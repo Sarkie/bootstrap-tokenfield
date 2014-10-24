@@ -231,46 +231,60 @@
       // Bail out if there if attributes are empty or event was defaultPrevented
       if (!createEvent.attrs || createEvent.isDefaultPrevented()) return
 
-      var $token = $('<div class="token" />')
-            .append('<span class="token-label" />')
-            .append('<a href="#" class="close" tabindex="-1">&times;</a>')
-            .data('attrs', attrs)
+      var token = '<div data-attrs="" class="token"><span style="max-width:"' + this.maxTokenWidth + ' class="token-label">' + attrs.label + '</span><a href="#" class="close" tabindex="-1">&times;</a></div>';
+     
+      // // Determine maximum possible token label width
+      // if (!this.maxTokenWidth) {
+      //   this.maxTokenWidth =
+      //     this.$wrapper.width() - $closeButton.outerWidth() -
+      //     parseInt($closeButton.css('margin-left'), 10) -
+      //     parseInt($closeButton.css('margin-right'), 10) -
+      //     parseInt($token.css('border-left-width'), 10) -
+      //     parseInt($token.css('border-right-width'), 10) -
+      //     parseInt($token.css('padding-left'), 10) -
+      //     parseInt($token.css('padding-right'), 10)
+      //     parseInt($tokenLabel.css('border-left-width'), 10) -
+      //     parseInt($tokenLabel.css('border-right-width'), 10) -
+      //     parseInt($tokenLabel.css('padding-left'), 10) -
+      //     parseInt($tokenLabel.css('padding-right'), 10)
+      //     parseInt($tokenLabel.css('margin-left'), 10) -
+      //     parseInt($tokenLabel.css('margin-right'), 10)
+      // }
 
-      // Insert token into HTML
-      if (this.$input.hasClass('tt-input')) {
-        // If the input has typeahead enabled, insert token before it's parent
-        this.$input.parent().before( $token )
-      } else {
-        this.$input.before( $token )
+   
+    
+
+      // Return original element
+      return token
+    }
+
+  , setTokens: function (tokens, add, triggerChange) {
+      if (!tokens) return
+
+      if (!add) this.$wrapper.find('.token').remove()
+
+      if (typeof triggerChange === 'undefined') {
+          triggerChange = true
       }
 
-      // Temporarily set input width to minimum
-      this.$input.css('width', this.options.minWidth + 'px')
-
-      var $tokenLabel = $token.find('.token-label')
-        , $closeButton = $token.find('.close')
-
-      // Determine maximum possible token label width
-      if (!this.maxTokenWidth) {
-        this.maxTokenWidth =
-          this.$wrapper.width() - $closeButton.outerWidth() -
-          parseInt($closeButton.css('margin-left'), 10) -
-          parseInt($closeButton.css('margin-right'), 10) -
-          parseInt($token.css('border-left-width'), 10) -
-          parseInt($token.css('border-right-width'), 10) -
-          parseInt($token.css('padding-left'), 10) -
-          parseInt($token.css('padding-right'), 10)
-          parseInt($tokenLabel.css('border-left-width'), 10) -
-          parseInt($tokenLabel.css('border-right-width'), 10) -
-          parseInt($tokenLabel.css('padding-left'), 10) -
-          parseInt($tokenLabel.css('padding-right'), 10)
-          parseInt($tokenLabel.css('margin-left'), 10) -
-          parseInt($tokenLabel.css('margin-right'), 10)
+      if (typeof tokens === 'string') {
+        if (this._delimiters.length) {
+          // Split based on delimiters
+          tokens = tokens.split( new RegExp( '[' + this._delimiters.join('') + ']' ) )
+        } else {
+          tokens = [tokens];
+        }
       }
 
-      $tokenLabel
-        .text(attrs.label)
-        .css('max-width', this.maxTokenWidth)
+      var _self = this
+      var items = [];
+      $.each(tokens, function (i, attrs) {
+        items.push(_self.createToken(attrs, triggerChange))
+      })
+
+      /* Need events on the container element
+        
+
 
       // Listen to events on token
       $token
@@ -309,37 +323,19 @@
         this.$element.val( this.getTokensList() ).trigger( $.Event('change', { initiator: 'tokenfield' }) )
       }
 
-      // Update tokenfield dimensions
-      this.update()
+*/
 
-      // Return original element
-      return this.$element.get(0)
-    }
+      //probably wrong
+      
+      // Insert token into HTML
+      if (this.$element.hasClass('tt-input')) {
+        // If the input has typeahead enabled, insert token before it's parent
+        return this.$element.parent().get(0).insertAdjacentHTML('beforebegin', items.join(''));
 
-  , setTokens: function (tokens, add, triggerChange) {
-      if (!tokens) return
-
-      if (!add) this.$wrapper.find('.token').remove()
-
-      if (typeof triggerChange === 'undefined') {
-          triggerChange = true
+      } else {
+        return this.$element.get(0).insertAdjacentHTML('beforebegin', items.join(''));
       }
-
-      if (typeof tokens === 'string') {
-        if (this._delimiters.length) {
-          // Split based on delimiters
-          tokens = tokens.split( new RegExp( '[' + this._delimiters.join('') + ']' ) )
-        } else {
-          tokens = [tokens];
-        }
-      }
-
-      var _self = this
-      $.each(tokens, function (i, attrs) {
-        _self.createToken(attrs, triggerChange)
-      })
-
-      return this.$element.get(0)
+      
     }
 
   , getTokenData: function($token) {
