@@ -1,4 +1,3 @@
-
 /*!
  * bootstrap-tokenfield
  * https://github.com/sliptree/bootstrap-tokenfield
